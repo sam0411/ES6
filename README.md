@@ -421,3 +421,38 @@ Map的回调函数参数依次为value、key和map本身
 
 ```
 
+## Function
+JavaScript的函数也是一个对象，上述定义的abs()函数实际上是一个函数对象，而函数名abs可以视为指向该函数的变量.
+
+```javascript
+
+	//Function definition, #1
+	function abs(x) {
+	    if (x >= 0) {
+	        return x;
+	    } else {
+	        return -x;
+	    }
+	}
+
+	//Function definition, #2
+	var abs = function (x) {
+	    if (x >= 0) {
+	        return x;
+	    } else {
+	        return -x;
+	    }
+	};
+
+	//Checking argument, throw
+	function abs(x) {
+	    if (typeof x !== 'number') {
+	        throw 'Not a number';
+	    }
+	    if (x >= 0) {
+	        return x;
+	    } else {
+	        return -x;
+	    }
+	}
+```
