@@ -456,3 +456,88 @@ JavaScript的函数也是一个对象，上述定义的abs()函数实际上是�
 	    }
 	}
 ```
+
+## Function ... arguments
+
+键字arguments，它只在函数内部起作用，并且永远指向当前函数的调用者传入的所有参数。arguments类似Array但它不是一个Array.
+
+利用arguments，你可以获得调用者传入的所有参数。也就是说，即使函数不定义任何参数，还是可以拿到参数的值
+
+实际上arguments最常用于判断传入参数的个数。
+
+```javascript
+
+	//arguments
+	function foo(x) {
+	    console.log('x = ' + x); // 10
+	    for (var i=0; i<arguments.length; i++) {
+	        console.log('arg ' + i + ' = ' + arguments[i]); // 10, 20, 30
+	    }
+	}
+	foo(10, 20, 30);
+
+	//arguments checking
+	function abs() {
+	    if (arguments.length === 0) {
+	        return 0;
+	    }
+	    var x = arguments[0];
+	    return x >= 0 ? x : -x;
+	}
+
+	abs(); // 0
+	abs(10); // 10
+	abs(-9); // 9
+
+	//arguments checking, ignore
+	// foo(a[, b], c)
+	// 接收2~3个参数，b是可选参数，如果只传2个参数，b默认为null：
+	function foo(a, b, c) {
+	    if (arguments.length === 2) {
+	        // 实际拿到的参数是a和b，c为undefined
+	        c = b; // 把b赋给c
+	        b = null; // b变为默认值
+	    }
+	    // ...
+	}
+```
+
+## Function ... reset
+ES6标准引入了rest参数
+
+rest参数只能写在最后，前面用...标识，从运行结果可知，传入的参数先绑定a、b，多余的参数以数组形式交给变量rest，所以，不再需要arguments我们就获取了全部参数
+
+```javascript
+
+	//Before ES6
+	function foo(a, b) {
+	    var i, rest = [];
+	    if (arguments.length > 2) {
+	        for (i = 2; i<arguments.length; i++) {
+	            rest.push(arguments[i]);
+	        }
+	    }
+	    console.log('a = ' + a);
+	    console.log('b = ' + b);
+	    console.log(rest);
+	}
+
+	//After ES6
+	function foo(a, b, ...rest) {
+	    console.log('a = ' + a);
+	    console.log('b = ' + b);
+	    console.log(rest);
+	}
+
+	foo(1, 2, 3, 4, 5);
+	// 结果:
+	// a = 1
+	// b = 2
+	// Array [ 3, 4, 5 ]
+
+	foo(1);
+	// 结果:
+	// a = 1
+	// b = undefined
+	// Array []
+```
