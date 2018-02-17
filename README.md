@@ -19,6 +19,10 @@ JavaScript的对象是一组由键-值组成的无序集合，要获取一个对
 
 由于JavaScript的对象是动态类型，你可以自由地给一个对象添加或删除属性
 
+JavaScript的默认对象表示方式{}可以视为其他语言中的Map或Dictionary的数据结构，即一组键值对。
+
+但是JavaScript的对象有个小问题，就是键必须是字符串。但实际上Number或者其他数据类型作为键也是非常合理的。
+
 如果我们要检测对象是否拥有某一属性，可以用in操作符. 如果in判断一个属性存在，这个属性不一定是xiaoming的，它可能是xiaoming继承得到的. 因为toString定义在object对象中，而所有对象最终都会在原型链上指向object，所以xiaoming也拥有toString属性。
 
 要判断一个属性是否是xiaoming自身拥有的，而不是继承得到的，可以用hasOwnProperty()方法
@@ -286,3 +290,134 @@ for循环的一个变体是for ... in循环，它可以把一个对象的所有�
 	}
 
 ```
+
+## Map
+ES6规范引入了新的数据类型Map. Map是一组键值对的结构，具有极快的查找速度.
+
+由于一个key只能对应一个value，所以，多次对一个key放入value，后面的值会把前面的值冲掉
+
+
+```javascript
+
+	//Map initialization
+	var m = new Map([['Michael', 95], ['Bob', 75], ['Tracy', 85]]);
+	m.get('Michael'); // 95
+
+	//Map, set & get & delete
+	var m = new Map(); // 空Map
+	m.set('Adam', 67); // 添加新的key-value
+	m.set('Bob', 59);
+	m.has('Adam'); // 是否存在key 'Adam': true
+	m.get('Adam'); // 67
+	m.delete('Adam'); // 删除key 'Adam'
+	m.get('Adam'); // undefined
+
+	//Map, overwrite
+	var m = new Map();
+	m.set('Adam', 67);
+	m.set('Adam', 88);
+	m.get('Adam'); // 88
+```
+
+## Set
+Set和Map类似，也是一组key的集合，但不存储value。由于key不能重复，所以，在Set中，没有重复的key.
+
+要创建一个Set，需要提供一个Array作为输入，或者直接创建一个空Set
+
+```javascript
+
+	//Set initialization
+	var s1 = new Set(); // 空Set
+	var s2 = new Set([1, 2, 3]); // 含1, 2, 3
+
+	//Set, duplicated element overwite
+	var s = new Set([1, 2, 3, 3, '3']);
+	s; // Set {1, 2, 3, "3"}
+
+	//Set, add
+	s.add(4);
+	s; // Set {1, 2, 3, 4}
+	s.add(4);
+	s; // 仍然是 Set {1, 2, 3, 4}
+
+	//Set, delete
+	var s = new Set([1, 2, 3]);
+	s; // Set {1, 2, 3}
+	s.delete(3);
+	s; // Set {1, 2}
+```
+
+## iterable
+为了统一集合类型，ES6标准引入了新的iterable类型，Array、Map和Set都属于iterable类型。
+
+具有iterable类型的集合可以通过新的for ... of循环来遍历。
+
+```javascript
+
+	//iterable, for...of
+	var a = ['A', 'B', 'C'];
+	var s = new Set(['A', 'B', 'C']);
+	var m = new Map([[1, 'x'], [2, 'y'], [3, 'z']]);
+	for (var x of a) { // 遍历Array
+	    console.log(x);
+	}
+	for (var x of s) { // 遍历Set
+	    console.log(x);
+	}
+	for (var x of m) { // 遍历Map
+	    console.log(x[0] + '=' + x[1]);
+	}
+
+```
+
+for ... in循环由于历史遗留问题，它遍历的实际上是对象的属性名称。一个Array数组实际上也是一个对象，它的每个元素的索引被视为一个属性。当我们手动给Array对象添加了额外的属性后，for ... in循环将带来意想不到的意外效果
+
+```javascript
+
+	//for...in
+	var a = ['A', 'B', 'C'];
+	a.name = 'Hello';
+	for (var x in a) {
+	    console.log(x); // '0', '1', '2', 'name'
+	}
+
+	//for...of
+	var a = ['A', 'B', 'C'];
+	a.name = 'Hello';
+	for (var x of a) {
+	    console.log(x); // 'A', 'B', 'C'
+	}
+```
+
+更好的方式是直接使用iterable内置的forEach方法，它接收一个函数，每次迭代就自动回调该函数.
+
+Set与Array类似，但Set没有索引，因此回调函数的前两个参数都是元素本身
+
+Map的回调函数参数依次为value、key和map本身
+
+
+```javascript
+
+	//forEach...array
+	var a = ['A', 'B', 'C'];
+	a.forEach(function (element, index, array) {
+	    // element: 指向当前元素的值
+	    // index: 指向当前索引
+	    // array: 指向Array对象本身
+	    console.log(element + ', index = ' + index);
+	});
+
+	//forEach...set
+	var s = new Set(['A', 'B', 'C']);
+	s.forEach(function (element, sameElement, set) {
+	    console.log(element);
+	});
+
+	//forEach..map
+	var m = new Map([[1, 'x'], [2, 'y'], [3, 'z']]);
+	m.forEach(function (value, key, map) {
+	    console.log(value);
+	});
+
+```
+
