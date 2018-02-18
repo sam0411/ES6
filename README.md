@@ -541,3 +541,241 @@ rest参数只能写在最后，前面用...标识，从运行结果可知，传�
 	// b = undefined
 	// Array []
 ```
+
+## Variable Scope
+
+如果一个变量在函数体内部申明，则该变量的作用域为整个函数体，在函数体外不可引用该变量
+
+```javascript
+
+	//No variable reference outside function
+	function foo() {
+	    var x = 1;
+	    x = x + 1;
+	}
+
+	x = x + 2; // ReferenceError! 无法在函数体外引用变量x
+```
+
+由于JavaScript的函数可以嵌套，此时，内部函数可以访问外部函数定义的变量，反过来则不行
+
+```javascript
+
+	function foo() {
+	    var x = 1;
+	    function bar() {
+	        var y = x + 1; // bar可以访问foo的变量x!
+	    }
+
+	    var z = y + 1; // ReferenceError! foo不可以访问bar的变量y!
+	}
+```
+
+JavaScript的函数在查找变量时从自身函数定义开始，从“内”向“外”查找。如果内部函数定义了与外部函数重名的变量，则内部函数的变量将“屏蔽”外部函数的变量。
+
+```javascript
+
+function foo() {
+    var x = 1;
+    function bar() {
+        var x = 'A';
+        console.log('x in bar() = ' + x); // 'A'
+    }
+    console.log('x in foo() = ' + x); // 1
+    bar();
+}
+
+foo();
+```
+
+JavaScript的函数定义有个特点，它会先扫描整个函数体的语句，把所有申明的变量“提升”到函数顶部.
+
+```javascript
+
+function foo() {
+    var x = 'Hello, ' + y;
+    console.log(x);
+    var y = 'Bob';
+}
+
+foo();
+
+```
+语句var x = 'Hello, ' + y;并不报错，原因是变量y在稍后申明了。但是console.log显示Hello, undefined，说明变量y的值为undefined。这正是因为JavaScript引擎自动提升了变量y的声明，但不会提升变量y的赋值。
+
+## Global Scope 全局作用域
+不在任何函数内定义的变量就具有全局作用域。实际上，JavaScript默认有一个全局对象window，全局作用域的变量实际上被绑定到window的一个属性.
+
+因此，直接访问全局变量course和访问window.course是完全一样的。
+
+你可能猜到了，由于函数定义有两种方式，以变量方式var foo = function () {}定义的函数实际上也是一个全局变量，因此，顶层函数的定义也被视为一个全局变量，并绑定到window对象
+
+我们每次直接调用的alert()函数其实也是window的一个变量
+
+```javascript
+
+	//window property as definition
+	var course = 'Learn JavaScript';
+	alert(course); // 'Learn JavaScript';
+	alert(window.course); // 'Learn JavaScript';
+
+	//window function as definition
+	function foo() {
+	    alert('foo');
+	}
+	foo(); // 直接调用foo()
+	window.foo(); // 通过window.foo()调用
+
+	//disable alert() window property
+	window.alert('调用window.alert()');
+	// 把alert保存到另一个变量:
+	var old_alert = window.alert;
+	// 给alert赋一个新函数:
+	window.alert = function () {}
+	alert('无法用alert()显示了!');
+
+```
+
+## Naming Space
+全局变量会绑定到window上，不同的JavaScript文件如果使用了相同的全局变量，或者定义了相同名字的顶层函数，都会造成命名冲突，并且很难被发现。 减少冲突的一个方法是把自己的所有变量和函数全部绑定到一个全局变量中。
+
+```javascript
+
+	var MYAPP = {};
+
+	// 其他变量:
+	MYAPP.name = 'myapp';
+	MYAPP.version = 1.0;
+
+	// 其他函数:
+	MYAPP.foo = function () {
+	    return 'foo';
+	};
+
+```
+
+## Destructing Assignment 解构赋值
+
+从ES6开始，JavaScript引入了解构赋值，可以同时对一组变量进行赋值。
+
+```javascript
+
+	//Before ES6
+	var array = ['hello', 'JavaScript', 'ES6'];
+	var x = array[0];
+	var y = array[1];
+	var z = array[2];
+
+	//After ES6
+	var [x, y, z] = ['hello', 'JavaScript', 'ES6'];
+	// x, y, z分别被赋值为数组对应元素:
+	console.log('x = ' + x + ', y = ' + y + ', z = ' + z);
+
+```
+
+对数组元素进行解构赋值时，多个变量要用[...]括起来。 解构赋值还可以忽略某些元素.
+```javascript
+	
+	//Assign array
+	let [x, [y, z]] = ['hello', ['JavaScript', 'ES6']];
+	x; // 'hello'
+	y; // 'JavaScript'
+	z; // 'ES6'
+
+	//Assign array, ignore x y
+	let [, , z] = ['hello', 'JavaScript', 'ES6']; // 忽略前两个元素，只对z赋值第三个元素
+	z; // 'ES6'
+```
+
+如果需要从一个对象中取出若干属性，也可以使用解构赋值，便于快速获取对象的指定属性.
+对一个对象进行解构赋值时，同样可以直接对嵌套的对象属性进行赋值，只要保证对应的层次是一致的.
+如果要使用的变量名和属性名不一致，可以用: assign old & new property name
+解构赋值还可以使用默认值，这样就避免了不存在的属性返回undefined的问题
+```javascript
+	
+	//Assign object
+	var person = {
+	    name: '小明',
+	    age: 20,
+	    gender: 'male',
+	    passport: 'G-12345678',
+	    school: 'No.4 middle school'
+	};
+	var {name, age, passport} = person;
+	console.log('name = ' + name + ', age = ' + age + ', passport = ' + passport);
+
+	//Assign object, nested
+	var person = {
+	    name: '小明',
+	    age: 20,
+	    gender: 'male',
+	    passport: 'G-12345678',
+	    school: 'No.4 middle school',
+	    address: {
+	        city: 'Beijing',
+	        street: 'No.1 Road',
+	        zipcode: '100001'
+	    }
+	};
+	var {name, address: {city, zip}} = person;
+	name; // '小明'
+	city; // 'Beijing'
+	zip; // undefined, 因为属性名是zipcode而不是zip
+	// 注意: address不是变量，而是为了让city和zip获得嵌套的address对象的属性:
+	address; // Uncaught ReferenceError: address is not defined
+
+	//Assign object, rename properties
+	var person = {
+	    name: '小明',
+	    age: 20,
+	    gender: 'male',
+	    passport: 'G-12345678',
+	    school: 'No.4 middle school'
+	};
+
+	// 把passport属性赋值给变量id:
+	let {name, passport:id} = person;
+	name; // '小明'
+	id; // 'G-12345678'
+	// 注意: passport不是变量，而是为了让变量id获得passport属性:
+	passport; // Uncaught ReferenceError: passport is not defined
+
+	//Assign object, default value
+	var person = {
+	    name: '小明',
+	    age: 20,
+	    gender: 'male',
+	    passport: 'G-12345678'
+	};
+
+	// 如果person对象没有single属性，默认赋值为true:
+	var {name, single=true} = person;
+	name; // '小明'
+	single; // true
+```
+
+解构赋值在很多时候可以大大简化代码。例如，交换两个变量x和y的值，可以这么写，不再需要临时变量
+```javascript
+	//Exchange X Y
+	var x=1, y=2;
+	[x, y] = [y, x]
+```
+
+## Method
+
+Bind a function with object
+```javascript
+
+	var xiaoming = {
+	    name: '小明',
+	    birth: 1990,
+	    age: function () {
+	        var y = new Date().getFullYear();
+	        return y - this.birth;
+	    }
+	};
+
+	xiaoming.age; // function xiaoming.age()
+	xiaoming.age(); // 今年调用是25,明年调用就变成26了
+
+```
