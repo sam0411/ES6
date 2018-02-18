@@ -779,3 +779,364 @@ Bind a function with object
 	xiaoming.age(); // 今年调用是25,明年调用就变成26了
 
 ```
+
+'this'是一个特殊变量，它始终指向当前对象.
+
+如果以对象的方法形式调用，比如xiaoming.age()，该函数的this指向被调用的对象，也就是xiaoming，这是符合我们预期的。
+
+如果单独调用函数，比如getAge()，此时，该函数的this指向全局对象，也就是window。
+
+ECMA决定，在strict模式下让函数的this指向undefined
+
+```javascript
+	
+	//this, point to window, window no birth property
+	function getAge() {
+	    var y = new Date().getFullYear();
+	    return y - this.birth;
+	}
+
+	var xiaoming = {
+	    name: '小明',
+	    birth: 1990,
+	    age: getAge
+	};
+
+	xiaoming.age(); // 25, 正常结果
+	getAge(); // NaN
+```
+
+```javascript
+	
+	//this, point to age, age is a function, no birth property
+	var xiaoming = {
+	    name: '小明',
+	    birth: 1990,
+	    age: function () {
+	        function getAgeFromBirth() {
+	            var y = new Date().getFullYear();
+	            return y - this.birth;
+	        }
+	        return getAgeFromBirth();
+	    }
+	};
+
+	xiaoming.age(); // Uncaught TypeError: Cannot read property 'birth' of undefined
+```
+
+```javascript
+
+	//that points to this, this is xiaoming, worked
+	var xiaoming = {
+	    name: '小明',
+	    birth: 1990,
+	    age: function () {
+	        var that = this; // 在方法内部一开始就捕获this
+	        function getAgeFromBirth() {
+	            var y = new Date().getFullYear();
+	            return y - that.birth; // 用that而不是this
+	        }
+	        return getAgeFromBirth();
+	    }
+	};
+
+	xiaoming.age(); // 25
+```
+
+## apply() & call(), control 'this' point to
+apply()方法，它接收两个参数，第一个参数就是需要绑定的this变量，第二个参数是Array，表示函数本身的参数
+
+call()方法，它接收两个参数，第一个参数就是需要绑定的this变量，第二个参数是把参数按顺序传入
+
+对普通函数调用，我们通常把this绑定为null
+
+```javascript
+
+	//apply
+	function getAge() {
+	    var y = new Date().getFullYear();
+	    return y - this.birth;
+	}
+
+	var xiaoming = {
+	    name: '小明',
+	    birth: 1990,
+	    age: getAge
+	};
+
+	xiaoming.age(); // 25
+	getAge.apply(xiaoming, []); // 25, this指向xiaoming, 参数为空
+
+	//call vs. apply
+	Math.max.apply(null, [3, 5, 4]); // 5
+	Math.max.call(null, 3, 5, 4); // 5
+```
+
+```javascript
+
+	//dynamically decrocate window function
+	var count = 0;
+	var oldParseInt = parseInt; // 保存原函数
+
+	window.parseInt = function () {
+	    count += 1;
+	    return oldParseInt.apply(null, arguments); // 调用原函数
+	};
+
+	parseInt('10');
+	parseInt('20');
+	parseInt('30');
+	console.log('count = ' + count); // 3
+```
+
+## Higher-order function
+JavaScript的函数其实都指向某个变量。既然变量可以指向函数，函数的参数能接收变量，那么一个函数就可以接收另一个函数作为参数，这种函数就称之为高阶函数。
+
+```javascript
+
+	function add(x, y, f) {
+	    return f(x) + f(y);
+	}
+	var x = add(-5, 6, Math.abs); // 11
+	console.log(x);
+
+```
+
+## map
+map()方法定义在JavaScript的Array中，我们调用Array的map()方法，传入我们自己的函数，就得到了一个新的Array作为结果.
+
+[x1, x2, x3, x4].map(f) = [f(x1), f(x2), f(x3), f(x4)]
+
+```javascript
+
+	function pow(x) {
+	    return x * x;
+	}
+	var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+	var results = arr.map(pow); // [1, 4, 9, 16, 25, 36, 49, 64, 81]
+	console.log(results);
+
+	//convert string
+	var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+	arr.map(String); // ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+```
+
+## reduce
+rray的reduce()把一个函数作用在这个Array的[x1, x2, x3...]上，这个函数必须接收两个参数，reduce()把结果继续和序列的下一个元素做累积计算.
+
+[x1, x2, x3, x4].reduce(f) = f(f(f(x1, x2), x3), x4)
+
+```javascript
+
+	//sum of array
+	var arr = [1, 3, 5, 7, 9];
+	arr.reduce(function (x, y) {
+	    return x + y;
+	}); // 25
+
+	//把[1, 3, 5, 7, 9]变换成整数13579
+	var arr = [1, 3, 5, 7, 9];
+	arr.reduce(function (x, y) {
+	    return x * 10 + y;
+	}); // 13579
+```
+
+## filter
+filter也用于把Array的某些元素过滤掉，然后返回剩下的元素 (elements whose filter function return true)
+
+```javascript
+
+	//filter out even number
+	var arr = [1, 2, 4, 5, 6, 9, 10, 15];
+	var r = arr.filter(function (x) {
+	    return x % 2 !== 0;
+	});
+	r; // [1, 5, 9, 15]
+
+	//filter out null / blank
+	var arr = ['A', '', 'B', null, undefined, 'C', '  '];
+	var r = arr.filter(function (s) {
+	    return s && s.trim(); // 注意：IE9以下的版本没有trim()方法
+	});
+	r; // ['A', 'B', 'C']
+
+```
+
+filter()接收的回调函数，其实可以有多个参数。通常我们仅使用第一个参数，表示Array的某个元素。回调函数还可以接收另外两个参数，表示元素的位置和数组本身.
+
+```javascript
+
+	var arr = ['A', 'B', 'C'];
+	var r = arr.filter(function (element, index, self) {
+	    console.log(element); // 依次打印'A', 'B', 'C'
+	    console.log(index); // 依次打印0, 1, 2
+	    console.log(self); // self就是变量arr
+	    return true;
+	});
+
+```
+
+## sort
+Array的sort()方法就是用于排序的. Array的sort()方法默认把所有元素先转换为String再排序.
+
+sort()方法会直接对Array进行修改，它返回的结果仍是当前Array
+
+```javascript
+
+	//sort number
+	var arr = [10, 20, 1, 2];
+	arr.sort(function (x, y) {
+	    if (x < y) {
+	        return -1;
+	    }
+	    if (x > y) {
+	        return 1;
+	    }
+	    return 0;
+	});
+	console.log(arr); // [1, 2, 10, 20]
+
+	//sort by alphabet, ignore case
+	var arr = ['Google', 'apple', 'Microsoft'];
+	arr.sort(function (s1, s2) {
+	    x1 = s1.toUpperCase();
+	    x2 = s2.toUpperCase();
+	    if (x1 < x2) {
+	        return -1;
+	    }
+	    if (x1 > x2) {
+	        return 1;
+	    }
+	    return 0;
+	}); // ['apple', 'Google', 'Microsoft']
+
+	//same array after sort
+	var a1 = ['B', 'A', 'C'];
+	var a2 = a1.sort();
+	a1; // ['A', 'B', 'C']
+	a2; // ['A', 'B', 'C']
+	a1 === a2; // true, a1和a2是同一对象
+
+```
+
+## 闭包（Closure）
+
+闭包就是携带状态的函数，并且它的状态可以完全对外隐藏起来. 闭包还可以把多参数的函数变成单参数的函数.
+
+闭包每次调用都会返回一个新的函数，即使传入相同的参数
+
+返回闭包时牢记的一点就是：返回函数不要引用任何循环变量，或者后续会发生变化的变量
+
+如果一定要引用循环变量怎么办？方法是再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，已绑定到函数参数的值不变
+
+```javascript
+
+	// return function, execute when function called
+	function lazy_sum(arr) {
+	    var sum = function () {
+	        return arr.reduce(function (x, y) {
+	            return x + y;
+	        });
+	    }
+	    return sum;
+	}
+	var f = lazy_sum([1, 2, 3, 4, 5]);
+	console.log(f());
+
+	// return new function everytime, even same parameter
+	var f1 = lazy_sum([1, 2, 3, 4, 5]);
+	var f2 = lazy_sum([1, 2, 3, 4, 5]);
+	f1 === f2; // false
+```
+
+```javascript
+
+	// return array, array contains 3 functions, each function call depends on i, when called, get value of i and output
+	function count() {
+	    var arr = [];
+	    for (var i=1; i<=3; i++) {
+	        arr.push(function () {
+	            return i * i;
+	        });
+	    }
+	    return arr;
+	}
+	var results = count();
+	var f1 = results[0];
+	var f2 = results[1];
+	var f3 = results[2];
+	f1();
+	f2();
+	f3();
+
+	//anomynous function, execute on flight
+	function count() {
+	    var arr = [];
+	    for (var i=1; i<=3; i++) {
+	        arr.push((function (n) {
+	            return function () {
+	                return n * n;
+	            }
+	        })(i));
+	    }
+	    return arr;
+	}
+
+	var results = count();
+	var f1 = results[0];
+	var f2 = results[1];
+	var f3 = results[2];
+
+	f1(); // 1
+	f2(); // 4
+	f3(); // 9
+```
+
+创建一个匿名函数并立刻执行
+```javascript
+
+	(function (x) {
+	    return x * x;
+	})(3); // 9
+
+```
+
+```javascript
+
+	//rely on x reference, create counter
+	function create_counter(initial) {
+	    var x = initial || 0;
+	    return {
+	        inc: function () {
+	            x += 1;
+	            return x;
+	        }
+	    }
+	}
+
+	var c1 = create_counter();
+	c1.inc(); // 1
+	c1.inc(); // 2
+	c1.inc(); // 3
+
+	var c2 = create_counter(10);
+	c2.inc(); // 11
+	c2.inc(); // 12
+	c2.inc(); // 13
+```
+
+```javascript
+
+	function make_pow(n) {
+	    return function (x) {
+	        return Math.pow(x, n);
+	    }
+	}
+
+	var pow2 = make_pow(2);
+	var pow3 = make_pow(3);
+
+	console.log(pow2(5)); // 25
+	console.log(pow3(7)); // 343
+
+```
