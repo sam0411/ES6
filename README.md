@@ -1,6 +1,15 @@
 # ES6
 ES6 Learning
 
+## JavaScript 数据类型
+number：和JavaScript的number完全一致；
+boolean：就是JavaScript的true或false；
+string：就是JavaScript的string；
+null：就是JavaScript的null；
+array：就是JavaScript的Array表示方式——[]；
+object：就是JavaScript的{ ... }表示方式。
+undefined: 就是JavaScript的function
+
 ## 相等运算符==
 JavaScript在设计时，有两种比较运算符：
 第一种是==比较，它会自动转换数据类型再比较，很多时候，会得到非常诡异的结果；
@@ -1210,5 +1219,505 @@ ES6标准新增了一种新的函数：Arrow Function（箭头函数): Input par
 	    }
 	};
 	obj.getAge(2015); // 25
+
+```
+
+## generator
+generator（生成器）是ES6标准引入的新的数据类型。一个generator看上去像一个函数，但可以返回多次。
+```javascript
+
+	//no yield
+	function foo(x) {
+	    return x + x;
+	}
+	var r = foo(1); // 调用foo函数
+
+
+	//with yield
+	function* foo(x) {
+	    yield x + 1;
+	    yield x + 2;
+	    return x + 3;
+	}
+	var ff = foo(3);
+	ff.next();
+```
+
+直接调用一个generator和调用函数不一样，fib(5)仅仅是创建了一个generator对象，还没有去执行它。
+
+next()方法会执行generator的代码，然后，每次遇到yield x;就返回一个对象{value: x, done: true/false}，然后“暂停”。返回的value就是yield的返回值，done表示这个generator是否已经执行结束了。如果done为true，则value就是return的返回值。
+
+```javascript
+
+	//no yield
+	function fib(max) {
+	    var
+	        t,
+	        a = 0,
+	        b = 1,
+	        arr = [0, 1];
+	    while (arr.length < max) {
+	        [a, b] = [b, a + b];
+	        arr.push(b);
+	    }
+	    return arr;
+	}
+	console.log(fib(8));
+
+	//with yield - while
+	function* fib(max) {
+	    var
+	        t,
+	        a = 0,
+	        b = 1,
+	        n = 0;
+	    while (n < max) {
+	        yield a;
+	        [a, b] = [b, a + b];
+	        n ++;
+	    }
+	    return;
+	}
+	var ff = fib(8);
+	ff.next();
+
+	//output using for of
+	for (var x of fib(10)) {
+	    console.log(x); // 依次输出0, 1, 1, 2, 3, ...
+	}
+```
+
+## Standard Object
+
+在JavaScript的世界里，一切都是对象。
+```javascript
+
+	typeof 123; // 'number'
+	typeof NaN; // 'number'
+	typeof 'str'; // 'string'
+	typeof true; // 'boolean'
+	typeof undefined; // 'undefined'
+	typeof Math.abs; // 'function'
+	typeof null; // 'object'
+	typeof []; // 'object'
+	typeof {}; // 'object'
+
+```
+可见，number、string、boolean、function和undefined有别于其他类型
+特别注意null的类型是object，Array的类型也是object，如果我们用typeof将无法区分出null、Array和通常意义上的object
+
+包装对象, number、boolean和string都有包装对象
+```javascript
+
+	var n = new Number(123); // 123,生成了新的包装类型
+	var b = new Boolean(true); // true,生成了新的包装类型
+	var s = new String('str'); // 'str',生成了新的包装类型
+
+	typeof new Number(123); // 'object'
+	new Number(123) === 123; // false
+
+	typeof new Boolean(true); // 'object'
+	new Boolean(true) === true; // false
+
+	typeof new String('str'); // 'object'
+	new String('str') === 'str'; // false
+```
+
+Number()、Boolean和String()被当做普通函数，把任何类型的数据转换为number、boolean和string类型
+```javascript
+
+	var n = Number('123'); // 123，相当于parseInt()或parseFloat()
+	typeof n; // 'number'
+
+	var b = Boolean('true'); // true
+	typeof b; // 'boolean'
+
+	var b2 = Boolean('false'); // true! 'false'字符串转换结果为true！因为它是非空字符串！
+	var b3 = Boolean(''); // false
+
+	var s = String(123.45); // '123.45'
+	typeof s; // 'string'
+```
+
+有这么几条规则需要遵守：
+1.不要使用new Number()、new Boolean()、new String()创建包装对象；
+2.用parseInt()或parseFloat()来转换任意类型到number；
+3.用String()来转换任意类型到string，或者直接调用某个对象的toString()方法；
+4.通常不必把任意类型转换为boolean再判断，因为可以直接写if (myVar) {...}；
+5.typeof操作符可以判断出number、boolean、string、function和undefined；
+6.判断Array要使用Array.isArray(arr)；
+7.判断null请使用myVar === null；
+8.判断某个全局变量是否存在用typeof window.myVar === 'undefined'；
+9.函数内部判断某个变量是否存在用typeof myVar === 'undefined'。
+
+## Date
+在JavaScript中，Date对象用来表示日期和时间。 
+
+JavaScript的月份范围用整数表示是0~11，0表示一月，1表示二月……，所以要表示6月，我们传入的是5.
+```javascript
+
+	var now = new Date();
+	now; // Wed Jun 24 2015 19:49:22 GMT+0800 (CST)
+	now.getFullYear(); // 2015, 年份
+	now.getMonth(); // 5, 月份，注意月份范围是0~11，5表示六月
+	now.getDate(); // 24, 表示24号
+	now.getDay(); // 3, 表示星期三
+	now.getHours(); // 19, 24小时制
+	now.getMinutes(); // 49, 分钟
+	now.getSeconds(); // 22, 秒
+	now.getMilliseconds(); // 875, 毫秒数
+	now.getTime(); // 1435146562875, 以number形式表示的时间戳
+
+	//create specified date
+	var d = new Date(2015, 5, 19, 20, 15, 30, 123);
+	d; // Fri Jun 19 2015 20:15:30 GMT+0800 (CST)
+```
+
+## Json
+SON还定死了字符集必须是UTF-8，表示多语言就没有问题了。
+为了统一解析，JSON的字符串规定必须用双引号""，Object的键也必须用双引号""。
+```javascript
+	var xiaoming = {
+	    name: '小明',
+	    age: 14,
+	    gender: true,
+	    height: 1.65,
+	    grade: null,
+	    'middle-school': '\"W3C\" Middle School',
+	    skills: ['JavaScript', 'Java', 'Python', 'Lisp']
+	};
+	var s = JSON.stringify(xiaoming);
+	console.log(s);
+	JSON.stringify(xiaoming, null, '  ');
+```
+
+## Object Oriented Programing
+JavaScript不区分类和实例的概念，而是通过原型（prototype）来实现面向对象编程。
+
+JavaScript的原型链和Java的Class区别就在，它没有“Class”的概念，所有对象都是实例，所谓继承关系不过是把一个对象的原型指向另一个对象而已。
+```javascript
+
+	var Student = {
+	    name: 'Robot',
+	    height: 1.2,
+	    run: function () {
+	        console.log(this.name + ' is running...');
+	    }
+	};
+
+	var xiaoming = {
+	    name: '小明'
+	};
+
+	xiaoming.__proto__ = Student;
+
+	xiaoming.name; // '小明'
+	xiaoming.run(); // 小明 is running...
+
+```
+
+在编写JavaScript代码时，不要直接用obj.__proto__去改变一个对象的原型，并且，低版本的IE也无法使用__proto__。
+Object.create()方法可以传入一个原型对象，并创建一个基于该原型的新对象，但是新对象什么属性都没有，因此，我们可以编写一个函数来创建xiaoming
+```javascript
+
+	// 原型对象:
+	var Student = {
+	    name: 'Robot',
+	    height: 1.2,
+	    run: function () {
+	        console.log(this.name + ' is running...');
+	    }
+	};
+
+	function createStudent(name) {
+	    // 基于Student原型创建一个新对象:
+	    var s = Object.create(Student);
+	    // 初始化新对象:
+	    s.name = name;
+	    return s;
+	}
+
+	var xiaoming = createStudent('小明');
+	xiaoming.run(); // 小明 is running...
+	xiaoming.__proto__ === Student; // true
+
+```
+
+JavaScript对每个创建的对象都会设置一个原型，指向它的原型对象。
+
+当我们用obj.xxx访问一个对象的属性时，JavaScript引擎先在当前对象上查找该属性，如果没有找到，就到其原型对象上找，如果还没有找到，就一直上溯到Object.prototype对象，最后，如果还没有找到，就只能返回undefined。
+
+Array.prototype定义了indexOf()、shift()等方法，因此你可以在所有的Array对象上直接调用这些方法。
+
+var arr = [1, 2, 3]; 其原型链是：arr ----> Array.prototype ----> Object.prototype ----> null
+
+函数也是一个对象，它的原型链是：foo ----> Function.prototype ----> Object.prototype ----> null
+
+由于Function.prototype定义了apply()等方法，因此，所有函数都可以调用apply()方法。
+
+很容易想到，如果原型链很长，那么访问一个对象的属性就会因为花更多的时间查找而变得更慢，因此要注意不要把原型链搞得太长。
+
+## 构造函数
+除了直接用{ ... }创建一个对象外，JavaScript还可以用一种构造函数的方法来创建对象。它的用法是，先定义一个构造函数.
+
+然后用关键字new来调用这个函数，并返回一个对象
+
+如果不写new，这就是一个普通函数，它返回undefined。但是，如果写了new，它就变成了一个构造函数，它绑定的this指向新创建的对象，并默认返回this，也就是说，不需要在最后写return this;。
+
+新创建的xiaoming的原型链是：
+
+xiaoming ----> Student.prototype ----> Object.prototype ----> null
+
+xiaoming ↘
+xiaohong -→ Student.prototype ----> Object.prototype ----> null
+xiaojun  ↗
+
+xiaoming.name; // '小明'
+xiaohong.name; // '小红'
+xiaoming.hello; // function: Student.hello()
+xiaohong.hello; // function: Student.hello()
+xiaoming.hello === xiaohong.hello; // false， function different
+
+## 原型继承 Before ES6
+JavaScript的原型继承实现方式就是：
+1.定义新的构造函数，并在内部用call()调用希望“继承”的构造函数，并绑定this；
+2.借助中间函数F实现原型链继承，最好通过封装的inherits函数完成；
+3.继续在新的构造函数的原型上定义新方法。
+```javascript
+
+	//原型链:new PrimaryStudent() ----> PrimaryStudent.prototype ----> Object.prototype ----> null
+	function Student(props) {
+	    this.name = props.name || 'Unnamed';
+	}
+
+	Student.prototype.hello = function () {
+	    alert('Hello, ' + this.name + '!');
+	}
+
+	function PrimaryStudent(props) {
+	    // 调用Student构造函数，绑定this变量:
+	    Student.call(this, props);
+	    this.grade = props.grade || 1;
+	}
+
+```
+
+## Class继承 After ES6
+关键字class从ES6开始正式被引入到JavaScript中。class的目的就是让定义类更简单。
+
+```javascript
+	
+	//class student
+	class Student {
+	    constructor(name) {
+	        this.name = name;
+	    }
+
+	    hello() {
+	        alert('Hello, ' + this.name + '!');
+	    }
+	}
+
+	//initialize Student
+	var xiaoming = new Student('小明');
+	xiaoming.hello();
+
+	//extend Student
+	class PrimaryStudent extends Student {
+	    constructor(name, grade) {
+	        super(name); // 记得用super调用父类的构造方法!
+	        this.grade = grade;
+	    }
+
+	    myGrade() {
+	        alert('I am at grade ' + this.grade);
+	    }
+	}
+```
+class的定义包含了构造函数constructor和定义在原型对象上的函数hello()（注意没有function关键字），这样就避免了Student.prototype.hello = function () {...}这样分散的代码。
+
+PrimaryStudent的定义也是class关键字实现的，而extends则表示原型链对象来自Student。子类的构造函数可能会与父类不太相同，例如，PrimaryStudent需要name和grade两个参数，并且需要通过super(name)来调用父类的构造函数，否则父类的name属性无法正常初始化。
+
+PrimaryStudent已经自动获得了父类Student的hello方法，我们又在子类中定义了新的myGrade方法。
+
+## 安全限制 -> 浏览器的同源策略
+默认情况下，JavaScript在发送AJAX请求时，URL的域名必须和当前页面完全一致。
+
+完全一致的意思是，域名要相同（www.example.com和example.com不同），协议要相同（http和https不同），端口号要相同（默认是:80端口，它和:8080就不同）。有的浏览器口子松一点，允许端口不同，大多数浏览器都会严格遵守这个限制。
+
+JSONP，它有个限制，只能用GET请求，并且要求返回JavaScript。这种方式跨域实际上是利用了浏览器允许跨域引用JavaScript资源：
+
+如果浏览器支持HTML5，那么就可以一劳永逸地使用新的跨域策略：CORS了。 CORS全称Cross-Origin Resource Sharing，是HTML5规范定义的如何跨域访问资源。
+
+## CORS
+Origin表示本域，也就是浏览器当前页面的域。当JavaScript向外域（如sina.com）发起请求后，浏览器收到响应后，首先检查Access-Control-Allow-Origin是否包含本域，如果是，则此次跨域请求成功，如果不是，则请求失败，JavaScript将无法获取到响应的任何数据。
+
+假设本域是my.com，外域是sina.com，只要响应头Access-Control-Allow-Origin为http://my.com，或者是*，本次请求就可以成功。 可见，跨域能否成功，取决于对方服务器是否愿意给你设置一个正确的Access-Control-Allow-Origin，决定权始终在对方手中。
+
+对于PUT、DELETE以及其他类型如application/json的POST请求，在发送AJAX请求之前，浏览器会先发送一个OPTIONS请求（称为preflighted请求）到这个URL上，询问目标服务器是否接受：
+	OPTIONS /path/to/resource HTTP/1.1
+	Host: bar.com
+	Origin: http://my.com
+	Access-Control-Request-Method: POST
+服务器必须响应并明确指出允许的Method：
+	HTTP/1.1 200 OK
+	Access-Control-Allow-Origin: http://my.com
+	Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS
+	Access-Control-Max-Age: 86400
+
+浏览器确认服务器响应的Access-Control-Allow-Methods头确实包含将要发送的AJAX请求的Method，才会继续发送AJAX，否则，抛出一个错误。
+
+由于以POST、PUT方式传送JSON格式的数据在REST中很常见，所以要跨域正确处理POST和PUT请求，服务器端必须正确响应OPTIONS请求。
+
+## Promise ES6
+在JavaScript的世界中，所有代码都是单线程执行的. 由于这个“缺陷”，导致JavaScript的所有网络操作，浏览器事件，都必须是异步执行。异步执行可以用回调函数实现.
+
+Promise有各种开源实现，在ES6中被统一规范，由浏览器直接支持。
+
+Promise最大的好处是在异步执行的流程中，把执行代码和处理结果的代码清晰地分离了
+```javascript
+
+function test(resolve, reject) {
+    var timeOut = Math.random() * 2;
+    console.log('set timeout to: ' + timeOut + ' seconds.');
+    setTimeout(function () {
+        if (timeOut < 1) {
+            console.log('call resolve()...');
+            resolve('200 OK');
+        }
+        else {
+            console.log('call reject()...');
+            reject('timeout in ' + timeOut + ' seconds.');
+        }
+    }, timeOut * 1000);
+}
+
+new Promise(test).then(function (result) {
+    console.log('成功：' + result);
+}).catch(function (reason) {
+    console.log('失败：' + reason); 
+});
+
+```
+
+Promise function always have resolve and reject. 
+resolve->then (function(){...})
+reject->catch (function(){...})
+
+有若干个异步任务，需要先做任务1，如果成功后再做任务2，任何任务失败则不再继续并执行错误处理函数。要串行执行这样的异步任务，不用Promise需要写一层一层的嵌套代码。有了Promise，我们只需要简单地写: job1.then(job2).then(job3).catch(handleError);
+```javascript
+	
+	// 0.5秒后返回input*input的计算结果:
+	function multiply(input) {
+	    return new Promise(function (resolve, reject) {
+	        console.log('calculating ' + input + ' x ' + input + '...');
+	        setTimeout(resolve, 500, input * input);
+	    });
+	}
+
+	// 0.5秒后返回input+input的计算结果:
+	function add(input) {
+	    return new Promise(function (resolve, reject) {
+	        console.log('calculating ' + input + ' + ' + input + '...');
+	        setTimeout(resolve, 500, input + input);
+	    });
+	}
+
+	var p = new Promise(function (resolve, reject) {
+	    console.log('start new Promise...');
+	    resolve(123);
+	});
+
+	p.then(multiply)
+	 .then(add)
+	 .then(multiply)
+	 .then(add)
+	 .then(function (result) {
+	    console.log('Got value: ' + result);
+	});
+
+```
+
+除了串行执行若干异步任务外，Promise还可以并行执行异步任务。
+```javascript
+
+	var p1 = new Promise(function (resolve, reject) {
+	    setTimeout(resolve, 500, 'P1');
+	});
+	var p2 = new Promise(function (resolve, reject) {
+	    setTimeout(resolve, 600, 'P2');
+	});
+	// 同时执行p1和p2，并在它们都完成后执行then:
+	Promise.all([p1, p2]).then(function (results) {
+	    console.log(results); // 获得一个Array: ['P1', 'P2']
+	});
+
+```
+
+有些时候，多个异步任务是为了容错。比如，同时向两个URL读取用户的个人信息，只需要获得先返回的结果即可。
+```javascript
+
+	var p1 = new Promise(function (resolve, reject) {
+	    setTimeout(resolve, 500, 'P1');
+	});
+	var p2 = new Promise(function (resolve, reject) {
+	    setTimeout(resolve, 600, 'P2');
+	});
+	Promise.race([p1, p2]).then(function (result) {
+	    console.log(result); // 'P1'
+	});
+
+```
+
+## try ... catch ... finally
+```javascript
+
+	var r1, r2, s = null;
+	try {
+	    r1 = s.length; // 此处应产生错误
+	    r2 = 100; // 该语句不会执行
+	} catch (e) {
+	    console.log('出错了：' + e);
+	} finally {
+	    console.log('finally');
+	}
+	console.log('r1 = ' + r1); // r1应为undefined
+	console.log('r2 = ' + r2); // r2应为undefined
+
+```
+
+JavaScript有一个标准的Error对象表示错误，还有从Error派生的TypeError、ReferenceError等错误对象。我们在处理错误时，可以通过catch(e)捕获的变量e访问错误对象：
+```javascript
+
+	try {
+	    ...
+	} catch (e) {
+	    if (e instanceof TypeError) {
+	        alert('Type error!');
+	    } else if (e instanceof Error) {
+	        alert(e.message);
+	    } else {
+	        alert('Error: ' + e);
+	    }
+	}
+
+```
+
+程序也可以主动抛出一个错误，让执行流程直接跳转到catch块。抛出错误使用throw语句。
+```javascript
+
+	var r, n, s;
+	try {
+	    s = prompt('请输入一个数字');
+	    n = parseInt(s);
+	    if (isNaN(n)) {
+	        throw new Error('输入错误');
+	    }
+	    // 计算平方:
+	    r = n * n;
+	    console.log(n + ' * ' + n + ' = ' + r);
+	} catch (e) {
+	    console.log('出错了：' + e);
+	}
 
 ```
