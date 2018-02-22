@@ -1721,3 +1721,410 @@ JavaScript有一个标准的Error对象表示错误，还有从Error派生的Typ
 	}
 
 ```
+
+## 第三方库->underscore
+underscore提供了一套完善的函数式编程的接口，让我们更方便地在JavaScript中实现函数式编程。
+
+underscore会把自身绑定到唯一的全局变量_上，这也是为啥它的名字叫underscore的原因。
+
+.map(obj, function (value, key) {...});
+```javascript
+
+	//return array
+	var obj = {
+	    name: 'bob',
+	    school: 'No.1 middle school',
+	    address: 'xueyuan road'
+	};
+
+	var upper = _.map(obj, function (value, key) {
+	    
+	    return value.toUpperCase();
+	});
+
+	console.log(JSON.stringify(upper)); //["BOB","NO.1 MIDDLE SCHOOL","XUEYUAN ROAD"]
+```
+
+.every([], arrow function); 当集合的所有元素都满足条件时，.every()函数返回true. 当集合是Object时，我们可以同时获得value和key
+```javascript
+
+	_.every([1, 4, 7, -3, -9], (x) => x > 0);
+
+```
+
+.some([], arrow function); 当集合的至少一个元素满足条件时，.some()函数返回true. 当集合是Object时，我们可以同时获得value和key
+```javascript
+
+_.some([1, 4, 7, -3, -9], (x) => x > 0);
+
+```
+
+```javascript
+
+	var obj = {
+	    name: 'bob',
+	    school: 'No.1 middle school',
+	    address: 'xueyuan road'
+	};
+
+	var r1 = _.every(obj, function (value, key) {
+	    return key===key.toLowerCase()&&value==value.toLowerCase();;
+	});
+	var r2 = _.some(obj, function (value, key) {
+	    return key===key.toLowerCase()&&value==value.toLowerCase();;
+	});
+
+	console.log('every key-value are lowercase: ' + r1 + '\nsome key-value are lowercase: ' + r2);
+
+```
+
+.max([]);这两个函数直接返回集合中最大的数. 只作用于value，忽略掉key
+.min([]);这两个函数直接返回集合中最小的数. 只作用于value，忽略掉key
+```javascript
+
+	var arr = [3, 5, 7, 9];
+	_.max(arr); // 9
+	_.min(arr); // 3
+
+	// 空集合会返回-Infinity和Infinity，所以要先判断集合不为空：
+	_.max([]) //-Infinity
+	_.min([]) //Infinity
+
+	_.max({ a: 1, b: 2, c: 3 }); // 3
+
+```
+
+.groupBy([], function(){...}); 把集合的元素按照key归类，key由传入的函数返回
+```javascript
+var scores = [20, 81, 75, 40, 91, 59, 77, 66, 72, 88, 99];
+var groups = _.groupBy(scores, function (x) {
+    if (x < 60) {
+        return 'C';
+    } else if (x < 80) {
+        return 'B';
+    } else {
+        return 'A';
+    }
+});
+// 结果:
+// {
+//   A: [81, 91, 88, 99],
+//   B: [75, 77, 66, 72],
+//   C: [20, 40, 59]
+// }
+
+```
+
+.shuffle([]); 用洗牌算法随机打乱一个集合
+.sample([], number_of_pick_up); 则是随机选择一个或多个元素
+```javascript
+
+	// 注意每次结果都不一样：
+	_.shuffle([1, 2, 3, 4, 5, 6]); // [3, 5, 4, 6, 2, 1]
+
+	// 注意每次结果都不一样：
+	// 随机选1个：
+	_.sample([1, 2, 3, 4, 5, 6]); // 2
+
+	// 随机选3个：
+	_.sample([1, 2, 3, 4, 5, 6], 3); // [6, 1, 4]
+
+```
+
+.first([]); 取第一个元素
+.last([]); 取最后一个元素
+```javascript
+
+	var arr = [2, 4, 6, 8];
+	_.first(arr); // 2
+	_.last(arr); // 8
+
+```
+
+.flatten([[]]); 接收一个Array，无论这个Array里面嵌套了多少个Array，flatten()最后都把它们变成一个一维数组
+```javascript
+
+	_.flatten([1, [2], [3, [[4], [5]]]]); // [1, 2, 3, 4, 5]
+
+```
+
+.zip([], []); 把两个或多个数组的所有元素按索引对齐，然后按索引合并成新数组。
+```javascript
+
+	var names = ['Adam', 'Lisa', 'Bart'];
+	var scores = [85, 92, 59];
+	_.zip(names, scores);
+	// [['Adam', 85], ['Lisa', 92], ['Bart', 59]]
+
+```
+
+.unzip([[]]); 则是反过来
+```javascript
+
+	var namesAndScores = [['Adam', 85], ['Lisa', 92], ['Bart', 59]];
+	_.unzip(namesAndScores);
+	// [['Adam', 'Lisa', 'Bart'], [85, 92, 59]]
+
+```
+
+.object([], []); 名字和分数直接对应成Object
+```javascript
+
+	var names = ['Adam', 'Lisa', 'Bart'];
+	var scores = [85, 92, 59];
+	_.object(names, scores);
+	// {Adam: 85, Lisa: 92, Bart: 59}
+
+```
+
+.range(-start, end, -step_length)让你快速生成一个序列
+```javascript
+
+	// 从0开始小于10:
+	_.range(10); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+	// 从1开始小于11：
+	_.range(1, 11); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+	// 从0开始小于30，步长5:
+	_.range(0, 30, 5); // [0, 5, 10, 15, 20, 25]
+
+	// 从0开始大于-10，步长-1:
+	_.range(0, -10, -1); // [0, -1, -2, -3, -4, -5, -6, -7, -8, -9]
+
+```
+
+.bind(obj_function, obj); 可以帮我们把s对象直接绑定在fn()的this指针上，以后调用fn()就可以直接正常调用了
+```javascript
+
+	var s = ' Hello  ';
+	var fn = _.bind(s.trim, s);
+	fn();
+	// 输出Hello
+
+```
+
+.partial(function, placeholder_parameter...)就是为一个函数创建偏函数. 创建偏函数的目的是将原函数的某些参数固定住，可以降低新函数调用的难度
+```javascript
+
+	var pow2N = _.partial(Math.pow, 2);
+	pow2N(3); // 8
+	pow2N(5); // 32
+	pow2N(10); // 1024
+
+	var cube = _.partial(Math.pow, _, 3);
+	cube(3); // 27
+	cube(5); // 125
+	cube(10); // 1000
+
+```
+
+.memoize(function); 可以自动缓存函数计算的结果
+```javascript
+
+	var factorial = _.memoize(function(n) {
+	    console.log('start calculate ' + n + '!...');
+	    var s = 1, i = n;
+	    while (i > 1) {
+	        s = s * i;
+	        i --;
+	    }
+	    console.log(n + '! = ' + s);
+	    return s;
+	});
+
+	// 第一次调用:
+	factorial(10); // 3628800
+	// 注意控制台输出:
+	// start calculate 10!...
+	// 10! = 3628800
+
+	// 第二次调用:
+	factorial(10); // 3628800
+	// 控制台没有输出
+
+```
+
+```javascript
+
+	var factorial = _.memoize(function(n) {
+	    console.log('start calculate ' + n + '!...');
+	    if (n < 2) {
+	        return 1;
+	    }
+	    return n * factorial(n - 1);
+	});
+
+	factorial(10); // 3628800
+	// 输出结果说明factorial(1)~factorial(10)都已经缓存了:
+	// start calculate 10!...
+	// start calculate 9!...
+	// start calculate 8!...
+	// start calculate 7!...
+	// start calculate 6!...
+	// start calculate 5!...
+	// start calculate 4!...
+	// start calculate 3!...
+	// start calculate 2!...
+	// start calculate 1!...
+
+	factorial(9); // 362880
+	// console无输出
+
+```
+
+.once(function); 保证某个函数执行且仅执行一次
+```javascript
+
+	var register = _.once(function () {
+	    alert('Register ok!');
+	});
+	register();
+	register();
+	register();
+
+```
+
+.delay(function, delay_milli, -parameter_for_function)可以让一个函数延迟执行，效果和setTimeout()是一样的，但是代码明显简单了
+```javascript
+
+	// 2秒后调用alert():
+	_.delay(alert, 2000);
+
+	var log = _.bind(console.log, console);
+	_.delay(log, 2000, 'Hello,', 'world!');
+	// 2秒后打印'Hello, world!':
+
+```
+
+.keys(obj)可以非常方便地返回一个object自身所有的key，但不包含从原型链继承下来的
+```javascript
+
+	function Student(name, age) {
+	    this.name = name;
+	    this.age = age;
+	}
+
+	var xiaoming = new Student('小明', 20);
+	_.keys(xiaoming); // ['name', 'age']
+
+```
+
+.allKeys(obj)除了object自身的key，还包含从原型链继承下来的
+```javascript
+
+	function Student(name, age) {
+	    this.name = name;
+	    this.age = age;
+	}
+	Student.prototype.school = 'No.1 Middle School';
+	var xiaoming = new Student('小明', 20);
+	_.allKeys(xiaoming); // ['name', 'age', 'school']
+
+```
+
+.values(obj)返回object自身但不包含原型链继承的所有值. 没有allValues().
+```javascript
+
+	var obj = {
+	    name: '小明',
+	    age: 20
+	};
+
+	_.values(obj); // ['小明', 20]
+
+```
+
+.mapObject(obj, function (value, key) {...});
+```javascript
+
+	//return array
+	var obj = {
+	    name: 'bob',
+	    school: 'No.1 middle school',
+	    address: 'xueyuan road'
+	};
+
+	var upper = _.mapObject(obj, function (value, key) {
+	    
+	    return value.toUpperCase();
+	});
+
+	console.log(JSON.stringify(upper)); //{"name":"BOB","school":"NO.1 MIDDLE SCHOOL","address":"XUEYUAN ROAD"}
+```
+
+.invert(obj)把object的每个key-value来个交换，key变成value，value变成key
+```javascript
+
+	var obj = {
+	    Adam: 90,
+	    Lisa: 85,
+	    Bart: 59
+	};
+	_.invert(obj); // { '59': 'Bart', '85': 'Lisa', '90': 'Adam' }
+
+```
+
+.extend(obj...); 把多个object的key-value合并到第一个object并返回. 如果有相同的key，后面的object的value将覆盖前面的object的value。
+```javascript
+
+	var a = {name: 'Bob', age: 20};
+	_.extend(a, {age: 15}, {age: 88, city: 'Beijing'}); // {name: 'Bob', age: 88, city: 'Beijing'}
+	// 变量a的内容也改变了：
+	a; // {name: 'Bob', age: 88, city: 'Beijing'}
+
+```
+
+.extendOwn(obj...); 把多个object的key-value合并到第一个object并返回. 获取属性时忽略从原型链继承下来的属性。
+```javascript
+
+	function Student(name, age) {
+	    this.name = name;
+	    this.age = age;
+	}
+	Student.prototype.school = 'No.1 Middle School';
+	var a = new Student('test01', 22);
+	_.extend(a, {age: 15}, {age: 88, city: 'Beijing'}, {school: '68 High School'}); 
+
+```
+
+.clone(obj); 复制一个object对象. 会把原有对象的所有属性都复制到新的对象中. 
+clone()是“浅复制”。所谓“浅复制”就是说，两个对象相同的key所引用的value其实是同一对象
+```javascript
+
+	var source = {
+	    name: '小明',
+	    age: 20,
+	    skills: ['JavaScript', 'CSS', 'HTML']
+	};
+	var copied = _.clone(source);
+	console.log(JSON.stringify(copied, null, '  ')); 
+
+```
+
+.isEqual(); 对两个object进行深度比较，如果内容完全相同，则返回true
+```javascript
+
+	//compare object
+	var o1 = { name: 'Bob', skills: { Java: 90, JavaScript: 99 }};
+	var o2 = { name: 'Bob', skills: { JavaScript: 99, Java: 90 }};
+	o1 === o2; // false
+	_.isEqual(o1, o2); // true
+
+	//compare array
+	var o1 = ['Bob', { skills: ['Java', 'JavaScript'] }];
+	var o2 = ['Bob', { skills: ['Java', 'JavaScript'] }];
+	o1 === o2; // false
+	_.isEqual(o1, o2); // true
+
+```
+
+.chain(); 把对象包装成能进行链式调用的方法.因为每一步返回的都是包装对象，所以最后一步的结果需要调用value()获得最终结果。
+```javascript
+
+	var r = _.chain([1, 4, 9, 16, 25])
+	         .map(Math.sqrt)
+	         .filter(x => x % 2 === 1)
+	         .value();
+	console.log(r);
+```
