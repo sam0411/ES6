@@ -262,7 +262,12 @@ join()方法是一个非常实用的方法，它把当前Array的每个元素都
 ```
 
 ## if statement
-JavaScript把null、undefined、0、NaN和空字符串''视为false，其他值一概视为true，因此上述代码条件判断的结果是true.
+JavaScript把null、undefined、0、NaN和空字符串''视为false，其他值一概视为true，因此上述代码条件判断的结果是true.  
+
+在 JavaScript 中，true && expression 总是返回 expression，而 false && expression 总是返回 false.  
+
+JavaScript 的条件运算符 condition ? true : false.  
+
 
 ## for statement
 for循环的一个变体是for ... in循环，它可以把一个对象的所有属性依次循环出来
@@ -305,6 +310,9 @@ ES6规范引入了新的数据类型Map. Map是一组键值对的结构，具有
 
 由于一个key只能对应一个value，所以，多次对一个key放入value，后面的值会把前面的值冲掉
 
+Keys可以在DOM中的某些元素被增加或删除的时候帮助React识别哪些元素发生了变化。因此你应当给数组中的每一个元素赋予一个确定的标识。
+一个元素的key最好是这个元素在列表中拥有的一个独一无二的字符串。通常，我们使用来自数据的id作为元素的key.  
+当元素没有确定的id时，你可以使用他的序列号索引index作为key.  
 
 ```javascript
 
